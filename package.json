@@ -10,9 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.3"
+    "express": "^4.17.3",
+    "firebase-admin": "^10.0.2",
+    "googleapis": "^39.2.0"
   },
   "engines": {
-    "node": "14.x"
+    "node": "16.x"
   }
 }
