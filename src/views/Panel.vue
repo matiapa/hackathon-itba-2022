@@ -5,13 +5,13 @@
         </v-col>
         <v-col class="mt-8">
             <v-container fluid class="mx-4" style="position: relative">
-                <v-btn fab absolute top right large class="white--text" color="orange" style="right: 80px;" @click="openCreateTask">
+                <v-btn fab absolute top right large class="white--text" color="orange" style="right: 40px;" @click="openCreateTask">
                     <v-icon>mdi-plus</v-icon>
                 </v-btn>
                 <v-row class="justify-center">
-                    <v-col cols="11">
+                    <v-col cols="12">
                         <v-row v-drag-and-drop:options="options">
-                            <v-card class="py-4 mx-2 px-1" :class="{'px-8 ml-4': index == groups.length - 1}" v-for="(group, index) in groups" :key="group.id" style="min-height: 800px" :style="index == groups.length - 1 ? 'width: 280px': 'width: 220px'"
+                            <v-card class="py-4 mx-2 px-1" :class="{'px-8 ml-4': index == groups.length - 1}" v-for="(group, index) in groups" :key="group.id" style="min-height: 800px" :style="index == groups.length - 1 ? 'width: 280px': 'width: 215px'"
                             :color="isDate(index) ? 'primary lighten-4': ''">
                                 <div class="d-flex justify-center mb-4">
                                     <div class="primary white--text text-center align-center pt-2" style="border-radius: 100%; width: 40px; height: 40px">
