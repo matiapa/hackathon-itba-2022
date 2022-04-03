@@ -27,7 +27,7 @@
                                 >
                                     <div class="drag-inner-list" style="height: 90%">
                                         <div class="drag-item secondary" style="cursor: pointer;" v-for="item in group.items" :key="item.id" :data-id="item.index" @click="openModal(item.index)">
-                                            <div class="circle" :class="{'red': item.priority == '3', 'yellow': item.priority == '2', 'green': item.priority == '1'}"></div>
+                                            <div class="circle" :class="{'red': item.inherent_priority == '3', 'yellow': item.inherent_priority == '2', 'green': item.inherent_priority == '1'}"></div>
                                             <span style="font-size: 12px;">{{ item.title }}</span><br>
                                             <span style="font-size: 12px" v-if="item.start_date !== null">{{item.start_hour}} - {{item.end_hour}}</span>
                                         </div>
@@ -63,7 +63,7 @@
                                     item-value="value"
                                     :items="priorities"
                                     label="Prioridad"
-                                    v-model="selectedActivity.priority"
+                                    v-model="selectedActivity.inherent_priority"
                                 ></v-select>
                             </td>
                         </tr>
@@ -180,7 +180,7 @@
                                     {{contact.email}}
                                 </v-col>
                                 <v-col>
-                                    {{contact.priority == 1 ? 'Baja' : (contact.priority == 2 ? 'Media' : 'Alta')}}
+                                    {{contact.inherent_priority == 1 ? 'Baja' : (contact.inherent_priority == 2 ? 'Media' : 'Alta')}}
                                 </v-col>
                                 <v-col cols="auto">
                                     <v-btn fab small class="accent" @click="deleteContact(index)">
@@ -200,7 +200,7 @@
                                         item-value="value"
                                         :items="priorities"
                                         label="Prioridad"
-                                        v-model="newContact.priority"
+                                        v-model="newContact.inherent_priority"
                                     ></v-select>
                                 </v-col>
                                 <v-col cols="auto">
@@ -274,7 +274,7 @@
                                 item-value="value"
                                 :items="priorities"
                                 label="Prioridad"
-                                v-model="newActivity.priority"
+                                v-model="newActivity.inherent_priority"
                             ></v-select>
                         </v-col>
                         <v-col class="d-flex justify-center">
@@ -308,11 +308,11 @@ export default {
                 start_hour: '',
                 end_date: '',
                 end_hour: '',
-                priority: '',
+                inherent_priority: '',
             },
             newContact: {
                 email: '',
-                priority: 1,
+                inherent_priority: 1,
             },
             priorities: [
                 {
@@ -395,7 +395,7 @@ export default {
                 start_date: Timestamp.fromDate(startDate),
                 end_date: Timestamp.fromDate(endDate),
                 owner_id: this.$store.state.user.email,
-                priority: this.newActivity.priority,
+                inherent_priority: this.newActivity.inherent_priority,
                 type: 'task'
             }).then(() => {
                 this.refresh()
@@ -405,7 +405,7 @@ export default {
                 this.newActivity.start_hour = ''
                 this.newActivity.end_date = ''
                 this.newActivity.end_hour = ''
-                this.newActivity.priority = ''
+                this.newActivity.inherent_priority = ''
                 this.dialog3 = false
             })
 
@@ -427,7 +427,7 @@ export default {
             this.contacts.push(this.newContact)
             this.newContact = {
                 email: '',
-                priority: 1,
+                inherent_priority: 1,
             }
             db.collection('users').doc(this.$store.state.user.email).update({
                 contacts: this.contacts
@@ -445,7 +445,7 @@ export default {
             db.collection('activities').doc(activity.id).update({
                 description: activity.description,
                 title: activity.title,
-                priority: activity.priority,
+                inherent_priority: activity.inherent_priority,
                 start_date: Timestamp.fromDate(startDate),
                 end_date: Timestamp.fromDate(endDate)
             }).then(() => {
@@ -469,7 +469,7 @@ export default {
                 start_hour: this.activities[index].start_hour,
                 end_date: this.activities[index].end_date,
                 end_hour: this.activities[index].end_hour,
-                priority: this.activities[index].priority,
+                inherent_priority: this.activities[index].inherent_priority,
             }
             if (this.selectedActivity.start_date)
                 this.selectedActivity.start_date = moment(this.selectedActivity.start_date).format('YYYY-MM-DD')
