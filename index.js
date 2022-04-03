@@ -92,7 +92,7 @@ app.post('/api/pubsub', async (req, res) => {
         }
         
         console.log({'from': senderEmail, 'to': userEmail, 'subject': subject, 'message': message.data.snippet})
-        parseEmail(senderEmail, userEmail , subject, message.data.snippet)
+        await parseEmail(senderEmail, userEmail , subject, message.data.snippet)
       }
     }
 
@@ -116,7 +116,7 @@ async function parseEmail(from, to, subject, message) {
   parsedMessage.end_date = new Date(parsedMessage.end_date)
   parsedMessage.requested_by = from
 
-  saveAndReorder(contactPriority, parsedMessage)
+  await saveAndReorder(contactPriority, parsedMessage)
 }
 
 async function getContactPriority(contact_email, user_email){
@@ -178,7 +178,7 @@ async function saveAndReorder(contactPriority, newAssignment){
 
       // Check if there is an assignment in the proposed moment
         
-      let currentAssignment = getAssignmentInMoment(todayAssignments, candidateMoment);
+      let currentAssignment = await getAssignmentInMoment(todayAssignments, candidateMoment);
       if(currentAssignment == null){
         // If no, allocate it here
         await admin.firestore().collection('activities').add(newAssignment)
@@ -189,8 +189,8 @@ async function saveAndReorder(contactPriority, newAssignment){
 
       // Check if the current assignment can be displaced
 
-      if((getContactPriority(currentAssignment.requested_by) < contactPriority)
-        || (getContactPriority(currentAssignment.requested_by) == contactPriority
+      if((await getContactPriority(currentAssignment.requested_by) < contactPriority)
+        || (await getContactPriority(currentAssignment.requested_by) == contactPriority
           && currentAssignment.inherent_priority < newAssignment.inherent_priority)
       ){
         // If so, displace it
@@ -247,7 +247,18 @@ app.listen(port, () => {
 // )
 
 
-// Debugging code
+// Debugging endpoints
+
+app.get('/api/subscribe', async (req, res) => {
+  oAuth2Client.setCredentials({'refresh_token': '1//0h85TrSRO0AwRCgYIARAAGBESNwF-L9IraH-qo1IdtTgnr2v6DZ3AM7cf8sSn35mtKfOWVXfXIc1bwOMAecYQP7Z_aEnM-YjZVcs'});
+  const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+  console.log(await gmail.users.watch(params = {
+    userId: 'me',
+    topicName: "projects/hackitba-5868f/topics/gmail",
+    labelIds: ["INBOX"]
+  }))
+  res.send("OK")
+})
 
 // app.get('/api/authenticate', async (req, res) => {
 //   const authorizationUrl = oAuth2Client.generateAuthUrl({
@@ -263,17 +274,6 @@ app.listen(port, () => {
 //   let q = url.parse(req.url, true).query;
 //   let { tokens } = await oAuth2Client.getToken(q.code);
 //   res.send(tokens)
-// })
-
-// app.get('/api/subscribe', async (req, res) => {
-//   oAuth2Client.setCredentials({'refresh_token': '1//0h85TrSRO0AwRCgYIARAAGBESNwF-L9IraH-qo1IdtTgnr2v6DZ3AM7cf8sSn35mtKfOWVXfXIc1bwOMAecYQP7Z_aEnM-YjZVcs'});
-//   const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-//   console.log(await gmail.users.watch(params = {
-//     userId: 'me',
-//     topicName: "projects/hackitba-5868f/topics/gmail",
-//     labelIds: ["INBOX"]
-//   }))
-//   res.send("OK")
 // })
 
 // app.post('/events/:calendarId', (req, res) => {
