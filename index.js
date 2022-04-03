@@ -1,3 +1,5 @@
+// Imports
+
 const express = require('express')
 const fs = require('fs');
 const url = require('url')
@@ -5,27 +7,29 @@ const app = express()
 const bodyParser = require('body-parser');
 const jwt_decode = require('jwt-decode')
 const cors = require('cors')
+const admin = require("firebase-admin");
+const { google } = require('googleapis');
 
-var corsOptions = {origin: '*'}
+// Middlewares
 
 app.use(bodyParser.json());
-app.use(cors())
 
-const port = process.env.PORT || 8080
+app.use(cors({origin: '*'}))
 
-const admin = require("firebase-admin");
+/// Firebase Admin
+
 const serviceAccount = JSON.parse(fs.readFileSync('credentials/firebase_service_account.json').toString())
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-const { google } = require('googleapis');
+// Google APIs
+
 const credentials = JSON.parse(fs.readFileSync('credentials/oauth2_client.json').toString())
 const { client_secret, client_id, redirect_uris } = credentials.web;
 const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, "postmessage");
 
-const {PubSub} = require('@google-cloud/pubsub');
-
+// Endpoints
 
 app.get('/api/login', async (req, res, next) => {
   try {
@@ -43,7 +47,8 @@ app.get('/api/login', async (req, res, next) => {
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
     gmail.users.watch(params = {
       topicName: "projects/hackitba-5868f/topics/gmail",
-      labelIds: ["INBOX"]
+      labelIds: ["INBOX"],
+      userId: 'me'
     })
 
     res.send(user)
@@ -51,7 +56,6 @@ app.get('/api/login', async (req, res, next) => {
     next(e)
   }
 })
-
 
 app.post('/api/pubsub', async (req, res) => {
   try {
@@ -102,9 +106,13 @@ app.post('/api/pubsub', async (req, res) => {
   res.status(200).send('')
 })
 
+// Listen
+
+const port = process.env.PORT || 8080
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Listening on port ${port}`)
 })
+
 // app.get('/api/authenticate', async (req, res) => {
 //   const authorizationUrl = oAuth2Client.generateAuthUrl({
 //     access_type: 'offline',
