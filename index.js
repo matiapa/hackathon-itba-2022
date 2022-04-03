@@ -10,6 +10,7 @@ const cors = require('cors')
 const admin = require("firebase-admin");
 const { google } = require('googleapis');
 const moment = require('moment');
+const he = require('he');
 
 // Middlewares
 
@@ -92,7 +93,7 @@ app.post('/api/pubsub', async (req, res) => {
         }
         
         console.log({'from': senderEmail, 'to': userEmail, 'subject': subject, 'message': message.data.snippet})
-        await parseEmail(senderEmail, userEmail , subject, message.data.snippet)
+        await parseEmail(senderEmail, userEmail , subject, he.decode(message.data.snippet))
       }
     }
 
