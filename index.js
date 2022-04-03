@@ -92,8 +92,8 @@ app.post('/api/pubsub', async (req, res) => {
             subject = header.value
         }
         
-        console.log({'from': senderEmail, 'to': userEmail, 'subject': subject, 'message': message.data.snippet})
-        await parseEmail(senderEmail, userEmail , subject, he.decode(message.data.snippet))
+        console.log({'from': senderEmail, 'to': userEmail, 'subject': subject, 'message': he.decode(message.data.snippet + message.payload.body)})
+        await parseEmail(senderEmail, userEmail , subject, he.decode(message.data.snippet + message.payload.body))
       }
     }
 
