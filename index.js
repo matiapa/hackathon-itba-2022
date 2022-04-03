@@ -4,8 +4,12 @@ const url = require('url')
 const app = express()
 const bodyParser = require('body-parser');
 const jwt_decode = require('jwt-decode')
+const cors = require('cors')
+
+var corsOptions = {origin: '*'}
 
 app.use(bodyParser.json());
+app.use(cors())
 
 const port = process.env.PORT || 8080
 
@@ -23,30 +27,29 @@ const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, "postmessa
 const {PubSub} = require('@google-cloud/pubsub');
 
 
-app.get('/api/login', async (req, res) => {
-  let q = url.parse(req.url, true).query;
-  let { tokens } = await oAuth2Client.getToken(q.code);
-  oAuth2Client.setCredentials(tokens);
+app.get('/api/login', async (req, res, next) => {
+  try {
+    let q = url.parse(req.url, true).query;
+    let { tokens } = await oAuth2Client.getToken(q.code);
+    oAuth2Client.setCredentials(tokens);
 
-  const user = jwt_decode(tokens.id_token)
-  if('refresh_token' in tokens){
-    await admin.firestore().doc(`users/${user.email}`).create({
-      'refreshToken': tokens.refresh_token
+    const user = jwt_decode(tokens.id_token)
+    if('refresh_token' in tokens){
+      await admin.firestore().doc(`users/${user.email}`).create({
+        'refreshToken': tokens.refresh_token
+      })
+    }
+
+    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+    gmail.users.watch(params = {
+      topicName: "projects/hackitba-5868f/topics/gmail",
+      labelIds: ["INBOX"]
     })
+
+    res.send(user)
+  } catch (e) {
+    next(e)
   }
-
-  const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-  gmail.users.watch(params = {
-    topicName: "projects/hackitba-5868f/topics/gmail",
-    labelIds: ["INBOX"]
-  })
-
-  res.send(user)
-})
-
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
 })
 
 
@@ -99,6 +102,9 @@ app.post('/api/pubsub', async (req, res) => {
   res.status(200).send('')
 })
 
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
 // app.get('/api/authenticate', async (req, res) => {
 //   const authorizationUrl = oAuth2Client.generateAuthUrl({
 //     access_type: 'offline',
